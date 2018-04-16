@@ -11,5 +11,5 @@
 	
 	movia r4, aloca
 	
-	ldw r5, 0(r4) # Lê no formato little endian
+	ldh r5, 0(r4) # Lê no formato little endian
 	
