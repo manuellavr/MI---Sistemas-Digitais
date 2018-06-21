@@ -12,21 +12,23 @@ module lcd_controller(
 	 output LCD_RW,
 	 output LCD_DADOS[7:0], 
 
-
 	);
 
 
 
 	// Estados
 
-    parameter   [2:0]   INIT = 3'b000,
-                        CONFIG = 3'b001,
-                        CONFIG_2 = 3'b010,
-                        FUNCTION_SET = 3'b011,
-                        DISPLAY_OFF = 3'b100,
-                        DISPLAY_CLEAR = 3'b101,
-                        ENTRY_MODE = 3'b110,
-                        DISPLAY_ON = 3'b111;
+    parameter   [3:0]   INIT = 4'b0000,
+                        CONFIG = 4'b0001,
+                        CONFIG_2 = 4'b0010,
+                        FUNCTION_SET = 4'b0011,
+                        DISPLAY_OFF = 4'b0100,
+                        DISPLAY_CLEAR = 4'b0101,
+                        ENTRY_MODE = 4'b0110,
+                        DISPLAY_ON = 4'b0111,
+                        WRITE_CHAR = 4'b1000,
+                        IDLE = 4'b1001;
+
 
 
     // Tempos de delay. Clock de 50MHz
@@ -35,6 +37,10 @@ module lcd_controller(
               tn_40ms = 22'd2000000, // 2000000 clks
               tn_4_1ms = 22'd205000, // 205000 clks
               tn_100us = 22'd5000; // 5000 clks 
+
+              
+    parameter [7:0]
+              letra_A = 8'b01000001; // Testar escrita 
 
 
     reg [2:0] next, reg_state;
@@ -147,7 +153,18 @@ module lcd_controller(
                         reg_en <= 1'b1;
                         next <= DISPLAY_ON;
                     end
-
+            WRITE_CHAR: begin
+                        reg_rs <= 1'b1;
+                        reg_db <= letra_A;
+                        reg_en <= 1'b1;
+                        next <= reg_state + 1;
+            end
+            IDLE: begin
+                    reg_rs <= 1'b0;
+                    reg_db <= 8'b0;
+                    reg_en <= 1'b0;
+                    next <= IDLE;
+            end
         endcase
     end
 
