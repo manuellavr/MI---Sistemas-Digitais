@@ -16,7 +16,6 @@ module lcd_controller(
 	);
 
 
-
 	// Estados
 
     parameter   [2:0]   INIT = 3'b000,
@@ -62,7 +61,6 @@ module lcd_controller(
     time_counter = 22'd0;
     enable_delay_count = 4'd0;
 
-
     always @ (posedge Clock or posedge Reset) begin
         if (Reset) begin
             reg_state <= 3'b000;
@@ -75,27 +73,25 @@ module lcd_controller(
 
     always @ (posedge Clock) begin
         
+    	if(enable_delay_count == tn_250ns && reg_en == 1'b1) begin
+    		enable_delay_count <= 4'd0;
+    		time_counter <= 22'd0;
+            next <= reg_state + 1;
+            reg_en <= 1'b0;	
+            enable_delay_count <= 4'd0;
+    	end
+    	else if(enable_delay_count != tn_250ns && reg_en == 1'b1) begin
+    		enable_delay_count = enable_delay_count + 1;
+    	end
+
 
         case (reg_state)
             INIT: begin
                          if (time_counter == tn_40ms) 
                             begin 
-
                                 reg_rs <= 1'b0;
                                 reg_db <= 8'b00110000;
                                 reg_en <= 1'b1;
-
-
-                                if(enable_delay_count == tn_250ns)
-                                	begin
-                                		time_counter <= 22'd0;
-                                		next <= reg_state + 1;
-                                		reg_en <= 1'b0;	
-                                		enable_delay_count <= 4'd0;
-                                	end
-                                else begin
-                                	enable_delay_count <= enable_delay_count + 1;
-                                end        
                             end
                          else                
                             begin   
@@ -110,18 +106,6 @@ module lcd_controller(
                                 reg_rs <= 1'b0;
                                 reg_db <= 8'b00110000;
                                 reg_en <= 1'b1;
-
-
-                                if(enable_delay_count == tn_250ns)
-                                	begin
-                                		time_counter <= 22'd0;
-                                		next <= reg_state + 1;
-                                		reg_en <= 1'b0;	
-                                		enable_delay_count <= 4'd0;
-                                	end
-                                else begin
-                                	enable_delay_count <= enable_delay_count + 1;
-                                end
                             end
                         else begin
                             time_counter <= time_counter + 1;
@@ -135,17 +119,6 @@ module lcd_controller(
                                 reg_rs <= 1'b0;
                                 reg_db <= 8'b00110000;
                                 reg_en <= 1'b1;
-                                
-                                if(enable_delay_count == tn_250ns) // Delay do bit de enable 
-                                	begin
-                                		time_counter <= 22'd0;
-                                		next <= reg_state + 1;
-                                		reg_en <= 1'b0;	
-                                		enable_delay_count <= 4'd0;
-                                	end
-                                else begin
-                                	enable_delay_count <= enable_delay_count + 1;
-                                end
                             end
                         else begin
                             time_counter <= time_counter + 1;
@@ -157,107 +130,33 @@ module lcd_controller(
                         reg_rs <= 1'b0;
                         reg_db <= {4'b0011, num_of_lines, 3'b000};
                         reg_en <= 1'b1;
-
-                                if(enable_delay_count == tn_250ns)
-                                	begin
-                                		time_counter <= 22'd0;
-                                		next <= reg_state + 1;
-                                		reg_en <= 1'b0;	
-                                		enable_delay_count <= 4'd0;
-                                	end
-                                else begin
-                                	enable_delay_count <= enable_delay_count + 1;
-                                end
-                        next <= reg_state + 1;
                     end
 
             DISPLAY_OFF: begin
                         reg_rs <= 1'b0;
                         reg_db <= 8'b00001000;
                         reg_en <= 1'b1;
-
-                                if(enable_delay_count == tn_250ns)
-                                	begin
-                                		time_counter <= 22'd0;
-                                		next <= reg_state + 1;
-                                		reg_en <= 1'b0;	
-                                		enable_delay_count <= 4'd0;
-                                	end
-                                else begin
-                                	enable_delay_count <= enable_delay_count + 1;
-                                end
-
-                        next <= reg_state + 1;
                     end
 
             DISPLAY_CLEAR: begin
                         reg_rs <= 1'b0;
                         reg_db <= 8'b00000001;
                         reg_en <= 1'b1;
-
-
-                                if(enable_delay_count == tn_250ns)
-                                	begin
-                                		time_counter <= 22'd0;
-                                		next <= reg_state + 1;
-                                		reg_en <= 1'b0;	
-                                		enable_delay_count <= 4'd0;
-                                	end
-                                else begin
-                                	enable_delay_count <= enable_delay_count + 1;
-                                end
-
-                        next <= reg_state + 1; 
                     end
             ENTRY_MODE: begin                   // Tem coisas ajustáveis
                         reg_rs <= 1'b0;
                         reg_db <= {6'b000001, cursor_direction, 1'b0};
                         reg_en <= 1'b1;
-
-                                if(enable_delay_count == tn_250ns)
-                                	begin
-                                		time_counter <= 22'd0;
-                                		next <= reg_state + 1;
-                                		reg_en <= 1'b0;	
-                                		enable_delay_count <= 4'd0;
-                                	end
-                                else begin
-                                	enable_delay_count <= enable_delay_count + 1;
-                                end
-                        next <= reg_state + 1; 
                     end
             DISPLAY_ON: begin
                         reg_rs <= 1'b0;
                         reg_db <= 8'b00001100; 
                         reg_en <= 1'b1;
-
-                                if(enable_delay_count == tn_250ns)
-                                	begin
-                                		time_counter <= 22'd0;
-                                		next <= reg_state + 1;
-                                		reg_en <= 1'b0;	
-                                		enable_delay_count <= 4'd0;
-                                	end
-                                else begin
-                                	enable_delay_count <= enable_delay_count + 1;
-                                end
-                        next <= reg_state + 1;
                     end
             WRITE_CHAR: begin
                         reg_rs <= 1'b1;
                         reg_db <= letra_A;
                         reg_en <= 1'b1;
-
-                        if(enable_delay_count == tn_250ns)
-                                	begin
-                                		time_counter <= 22'd0;
-                                		next <= reg_state + 1;
-                                		reg_en <= 1'b0;	
-                                		enable_delay_count <= 4'd0;
-                                	end
-                                else begin
-                                	enable_delay_count <= enable_delay_count + 1;
-                                end
             		end
             IDLE: begin
                     reg_rs <= 1'b0;
