@@ -11,10 +11,7 @@ module lcd_controller(
 	 output LCD_RS,
 	 output LCD_RW,
 	 output LCD_DADOS[7:0], 
-
-
 	);
-
 
 	// Estados
 
@@ -38,7 +35,6 @@ module lcd_controller(
 
     parameter [7:0]
               letra_A = 8'b01000001; // Testar escrita 
-
 
 
     reg [2:0] next, reg_state;
@@ -71,18 +67,19 @@ module lcd_controller(
     end
 
 
-    always @ (posedge Clock) begin
+    always @ (posedge Clock or reg_state) begin
         
-    	if(enable_delay_count == tn_250ns && reg_en == 1'b1) begin
-    		enable_delay_count <= 4'd0;
-    		time_counter <= 22'd0;
-            next <= reg_state + 1;
-            reg_en <= 1'b0;	
-            enable_delay_count <= 4'd0;
-    	end
-    	else if(enable_delay_count != tn_250ns && reg_en == 1'b1) begin
-    		enable_delay_count = enable_delay_count + 1;
-    	end
+        if(reg_en == 1'b1) begin
+        	if(enable_delay_count == tn_250ns) begin
+	        	enable_delay_count <= 4'd0;
+	    		time_counter <= 22'd0;
+	            next <= reg_state + 1;
+	            reg_en <= 1'b0;	
+        	end
+        	else begin
+        		enable_delay_count <= enable_delay_count + 1;	
+        	end	
+        end
 
 
         case (reg_state)
