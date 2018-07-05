@@ -36,10 +36,9 @@ module lcd_controller(
 
     // Tempos de delay. Clock de 50MHz
     parameter [17:0]
-              tn_40ms  = 18'd160_000, 
-              tn_20ms = 18'd80_000,
-              tn_4ms = 18'd16_000, 
-              tn_100us = 18'd5_000;
+              tn_40ms  = 6'd40, 
+              tn_20ms = 6'd20,
+              tn_4ms = 6'd4;
 
     parameter [7:0] letra_A = 8'b01000001; // Testar escrita 
 
@@ -48,9 +47,9 @@ module lcd_controller(
    reg reg_en = 1'b0, reg_rs = ; 
 	reg reg_rw = 1'b0;
    reg [7:0] reg_db; // = 8'b11111111;
-   reg [20:0] time_counter = 18'd0;
+   reg [20:0] time_counter = 6'd0;
    reg num_of_lines = 1'b1, cursor_direction = 1'b1;
-	reg [2:0] clk_conversor;
+	reg [15:0] clk_conversor;
 	reg lcd_clk;
 
 	// Flags for delays
@@ -70,9 +69,9 @@ module lcd_controller(
    
     // Converter clock 50MHz (20 nanosegundos pra 250 nanosegundos)
 	 always @ (posedge Clock) begin
-		if (clk_conversor == 3'b111) begin
+		if (clk_conversor == 16'd50_000) begin
 			lcd_clk <= ~lcd_clk;
-			clk_conversor <= 3'b001;
+			clk_conversor <= 16'd1;
 		end
 		else begin 
 			clk_conversor <= clk_conversor + 1'b1;
@@ -86,7 +85,7 @@ module lcd_controller(
 	// Flags counter
 	always @ (posedge lcd_clk or posedge Reset or posedge flag_rst) begin
 		if (Reset == 1'b1) begin
-			time_counter <= 18'd0;
+			time_counter <= 6'd0;
 			flag_100us <= 1'b0;
 			flag_4ms <= 1'b0;
 			flag_20ms <= 1'b0;
@@ -98,7 +97,7 @@ module lcd_controller(
 				flag_4ms <= 1'b0;
 				flag_20ms <= 1'b0;
 				flag_40ms <= 1'b0;
-				time_counter <= 18'd0;
+				time_counter <= 6'd0;
 			end
 			else begin
 				time_counter <= time_counter + 1'b1;
